@@ -1,2 +1,6 @@
-# altair_matplotlib
-Matplotlib renderer for Altair
+Altair-Matplotlib
+-----------------
+
+*This is a work-in-progress*
+
+Matplotlib renderer for Altair/Vega-Lite plots.
