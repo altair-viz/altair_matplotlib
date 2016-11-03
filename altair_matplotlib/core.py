@@ -3,8 +3,28 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import altair
 
+from . import utils
+
 
 def render(chart):
+    """Render an Altair chart as a matplotlib figure
+
+    Parameters
+    ----------
+    chart : altair.Chart
+        a Chart, LayeredChart, or FacetedChart to render
+
+    Returns
+    -------
+    fig : matplotlib.Figure
+        the rendered Figure
+
+    Raises
+    ------
+    NotImplementedError :
+        Many portions of the Vega-Lite schema are not yet supported, and this
+        routine raises a NotImplementedError when it encounters them.
+    """
     # dispatch on chart type
     if isinstance(chart, altair.Chart):
         return _render_chart(chart)
@@ -25,13 +45,6 @@ def _defined_traits(obj):
         return [t for t in obj.trait_names() if getattr(obj, t)]
 
 
-def _get_dataframe(chart):
-    if isinstance(chart.data, pd.DataFrame):
-        return chart.data
-    else:
-        raise NotImplementedError("data of type {0}".formattype(chart.data))
-
-
 def _render_chart(chart):
     if chart.mark == 'line':
         return _render_line_chart(chart)
@@ -40,7 +53,7 @@ def _render_chart(chart):
 
 
 def _render_line_chart(chart):
-    data = _get_dataframe(chart)
+    data = utils.chart_data(chart)
     encodings = _defined_traits(chart.encoding)
 
     if chart.encoding.color:
