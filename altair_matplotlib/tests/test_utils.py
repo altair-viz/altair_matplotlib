@@ -3,13 +3,13 @@ import os
 import pandas as pd
 import altair
 
-from altair_matplotlib.utils import chart_data
+from altair_matplotlib.utils import chart_data, group_by_encoding
 
 CSV_URL = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data.csv'))
 JSON_URL = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data.json'))
 
 
-def _make_data():
+def _make_data_files():
     data = pd.DataFrame({'x': [4, 5, 6],
                          'y': ['a', 'b', 'c'],
                          'z': [0.25, 0.5, 1.0]})
@@ -33,3 +33,19 @@ def test_chart_data():
     for datatype in [data, CSV_URL, JSON_URL, data_by_value]:
         chart = altair.Chart(datatype)
         assert data.equals(chart_data(chart))
+
+
+def test_group_by_encoding():
+    data = pd.DataFrame({'foo': [1, 1, 2, 2, 3, 3],
+                         'bar': [1, 2, 3, 4, 5, 6],
+                         'baz': ['a', 'b', 'c', 'd', 'e', 'f']})
+    chart = altair.Chart(data).mark_point().encode(
+        x=altair.X('foo', value=3),
+        y='mean(bar):Q',
+        color=altair.Color(value='blue'),
+        row=altair.Row(),
+    )
+
+    grouped = group_by_encoding(chart)
+    assert grouped.equals(pd.DataFrame({'x': [1, 2, 3],
+                                        'y': [1.5, 3.5, 5.5]}))

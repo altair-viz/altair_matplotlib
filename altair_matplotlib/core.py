@@ -28,14 +28,12 @@ def render(chart):
     # dispatch on chart type
     if isinstance(chart, altair.Chart):
         return _render_chart(chart)
-    elif isinstance(chart, altair.LayeredChart):
-        return _render_layeredchart(chart)
-    elif isinstance(chart, altair.FacetedChart):
-        return _render_facetedchart(chart)
     elif isinstance(chart, dict):
         return render(altair.Chart.from_dict(chart))
     elif isinstance(chart, string):
         return render(altair.Chart.from_json(chart))
+    else:
+        raise NotImplementedError("Chart type = {0}".format(type(chart)))
 
 
 def _defined_traits(obj):
@@ -74,11 +72,3 @@ def _render_line_chart(chart):
         ax.legend(title=chart.encoding.color.field)
 
     return fig
-
-
-def _render_layeredchart(chart):
-    raise NotImplementedError("Faceted Chart")
-
-
-def _render_facetedchart(chart):
-    raise NotImplementedError("Layered Chart")
