@@ -47,5 +47,7 @@ def test_group_by_encoding():
     )
 
     grouped = group_by_encoding(chart)
-    assert grouped.equals(pd.DataFrame({'x': [1, 2, 3],
-                                        'y': [1.5, 3.5, 5.5]}))
+    expected = pd.DataFrame({'x': [1, 2, 3],
+                             'y': [1.5, 3.5, 5.5]})
+
+    assert grouped.equals(expected)
