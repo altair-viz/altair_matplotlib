@@ -40,7 +40,7 @@ def test_group_by_encoding():
                          'bar': [1, 2, 3, 4, 5, 6],
                          'baz': ['a', 'b', 'c', 'd', 'e', 'f']})
     chart = altair.Chart(data).mark_point().encode(
-        x=altair.X('foo', value=3),
+        x='foo',
         y='mean(bar):Q',
         color=altair.Color(value='blue'),
         row=altair.Row(),
@@ -49,5 +49,26 @@ def test_group_by_encoding():
     grouped = group_by_encoding(chart)
     expected = pd.DataFrame({'x': [1, 2, 3],
                              'y': [1.5, 3.5, 5.5]})
+
+    assert grouped.equals(expected)
+
+
+def test_group_by_multiple_aggregates():
+    data = pd.DataFrame({'foo': [1, 1, 2, 2, 3, 3],
+                         'bar': [1, 2, 3, 4, 5, 6],
+                         'baz': ['a', 'b', 'c', 'd', 'e', 'f']})
+    chart = altair.Chart(data).mark_point().encode(
+        x='foo',
+        y='min(bar):Q',
+        y2='max(bar):Q'
+    )
+
+    grouped = group_by_encoding(chart)
+    expected = pd.DataFrame({'x': [1, 2, 3],
+                             'y': [1, 3, 5],
+                             'y2': [2, 4, 6]})
+
+    print(grouped)
+    print(expected)
 
     assert grouped.equals(expected)

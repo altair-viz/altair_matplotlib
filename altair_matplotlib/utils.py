@@ -1,5 +1,7 @@
 """Utilities for Altair-matplotlib"""
 
+from collections import defaultdict
+
 import pandas as pd
 import altair
 
@@ -65,24 +67,23 @@ def group_by_encoding(chart):
     if chart.transform is not None:
         raise NotImplementedError("transformed/filtered data")
 
-    # Extract group names and associated fields
-    fields = [enc.field for enc in defined_encodings.values()
-              if enc.field is not None and enc.aggregate is None]
-
-    # Extract all aggregated encodings
-    # TODO: handle columns with multiple aggregates
-    aggregates = {encoding.field: encoding.aggregate
-                  for name, encoding in defined_encodings.items()
-                  if encoding.field is not None
-                  and encoding.aggregate is not None}
+    # Extract group and aggregate names
+    group_fields = []
+    group_names = []
+    aggregates = defaultdict(dict)
+    for name, encoding in defined_encodings.items():
+        if encoding.field is not None:
+            if encoding.aggregate is None:
+                group_fields.append(encoding.field)
+                group_names.append(name)
+            else:
+                aggregates[encoding.field][name] = encoding.aggregate
 
     # Group and aggregate
-    # TODO: map VL aggregates to pandas aggregates
-    grouped = data.groupby(fields).aggregate(aggregates).reset_index()
-
-    # Now select all relevant columns and rename them to their encoding
-    grouped = pd.DataFrame({name: grouped[encoding.field]
-                            for name, encoding in defined_encodings.items()
-                            if encoding.field is not None})
+    grouped = data.groupby(group_fields).aggregate(aggregates)
+    grouped.index.names = group_names
+    grouped.columns = grouped.columns.droplevel()
+    grouped = grouped.reindex_axis(sorted(grouped.columns), axis=1)
+    grouped = grouped.reset_index()
 
     return grouped
